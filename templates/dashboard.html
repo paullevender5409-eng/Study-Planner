@@ -6,7 +6,7 @@
 <!-- Modern Welcome Banner -->
 <div class="welcome-banner">
     <div class="welcome-text">
-        <h2>Good {% if now.hour < 12 %}Morning{% elif now.hour < 17 %}Afternoon{% else %}Evening{% endif %}, {{ session.user_name.split()[0] }}! 👋</h2>
+        <h2><span id="timeGreeting">Good {% if now.hour < 12 %}morning{% elif now.hour < 17 %}afternoon{% else %}evening{% endif %}</span>, {{ session.user_name.split()[0] }}! 👋</h2>
         <p>Ready to make progress on your academic goals today?</p>
     </div>
     <div class="welcome-date-badge">
@@ -258,6 +258,21 @@
 
 {% block scripts %}
 <script>
+// Dynamic client-side greeting based on user's device local time
+(function() {
+    const currentHour = new Date().getHours();
+    let localGreeting = 'Good morning';
+    if (currentHour >= 12 && currentHour < 17) {
+        localGreeting = 'Good afternoon';
+    } else if (currentHour >= 17) {
+        localGreeting = 'Good evening';
+    }
+    const greetingEl = document.getElementById('timeGreeting');
+    if (greetingEl) {
+        greetingEl.textContent = localGreeting;
+    }
+})();
+
 // Chart initialization
 const weeklyData = {{ weekly_data | tojson }};
 const labels = [];

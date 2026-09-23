@@ -80,12 +80,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // =============================================
-    // Display Formatted Today Date in Welcome Banner
+    // Display Formatted Today Date & Time-based Greeting
     // =============================================
     const dateSpan = document.getElementById('currentDate');
     if (dateSpan) {
         const now = new Date();
         const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
         dateSpan.textContent = now.toLocaleDateString(undefined, options);
+    }
+
+    const greetingSpan = document.getElementById('timeGreeting');
+    if (greetingSpan) {
+        const hour = new Date().getHours();
+        let greeting = 'Good morning';
+        if (hour >= 12 && hour < 17) {
+            greeting = 'Good afternoon';
+        } else if (hour >= 17) {
+            greeting = 'Good evening';
+        }
+        greetingSpan.textContent = greeting;
     }
 });
