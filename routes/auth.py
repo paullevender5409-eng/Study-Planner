@@ -69,15 +69,20 @@ def login():
             flash('Please enter email and password.', 'danger')
             return render_template('auth/login.html')
 
-        user = query_db('SELECT * FROM users WHERE email=%s', (email,), one=True)
-        if user and bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
-            session['user_id'] = user['id']
-            session['user_name'] = user['name']
-            session['user_email'] = user['email']
-            flash(f'Welcome back, {user["name"]}!', 'success')
-            return redirect(url_for('dashboard.index'))
-        else:
-            flash('Invalid email or password.', 'danger')
+        try:
+            user = query_db('SELECT * FROM users WHERE email=%s', (email,), one=True)
+            if user and bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+                session['user_id'] = user['id']
+                session['user_name'] = user['name']
+                session['user_email'] = user['email']
+                flash(f'Welcome back, {user["name"]}!', 'success')
+                return redirect(url_for('dashboard.index'))
+            else:
+                flash('Invalid email or password.', 'danger')
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            flash(f'Authentication error: {str(e)}', 'danger')
 
     return render_template('auth/login.html')
 

@@ -17,7 +17,6 @@ from datetime import date, timedelta, datetime
 
 # Resolve paths
 BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH   = os.path.join(BASE_DIR, 'database', 'study_planner.db')
 SCHEMA    = os.path.join(BASE_DIR, 'database', 'schema.sql')
 
 sys.path.insert(0, BASE_DIR)
@@ -32,14 +31,23 @@ def dt(offset_days=0, hour=9, minute=0):
         hour=hour, minute=minute, second=0, microsecond=0
     ).strftime('%Y-%m-%d %H:%M:%S')
 
-def init_db():
-    print(f"Initialising database at: {DB_PATH}")
-    conn = sqlite3.connect(DB_PATH)
+def init_db(target_path=None):
+    if target_path:
+        db_path = target_path
+    else:
+        try:
+            from models.db import get_db_path
+            db_path = get_db_path()
+        except Exception:
+            db_path = os.path.join(BASE_DIR, 'database', 'study_planner.db')
+
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    print(f"Initialising database at: {db_path}")
+    conn = sqlite3.connect(db_path)
     conn.execute('PRAGMA foreign_keys = ON')
 
     # Run schema
     with open(SCHEMA, 'r') as f:
-        # Filter out comment-only lines and PRAGMA (already executed)
         sql = f.read()
     conn.executescript(sql)
     print("  Schema created.")
@@ -176,7 +184,7 @@ def init_db():
 
     conn.close()
     print("\n✅ Database initialised successfully!")
-    print(f"   File: {DB_PATH}")
+    print(f"   File: {db_path}")
     print("\n📋 Demo login:")
     print("   Email   : pranali@example.com")
     print("   Password: Demo@123")
