@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if subject else 'Add' }} Subject – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-journal-bookmark-fill me-2"></i>{{ 'Edit' if subject else 'Add' }} Subject{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card card-glass">
+            <div class="card-body p-4">
+                <h5 class="mb-4 fw-semibold">{{ 'Edit Subject' if subject else 'Add New Subject' }}</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name"
+                               value="{{ subject.name if subject else '' }}" placeholder="e.g. Advanced Algorithms" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Subject Code</label>
+                            <input type="text" class="form-control" name="code"
+                                   value="{{ subject.code if subject else '' }}" placeholder="e.g. CS301">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Credits</label>
+                            <input type="number" class="form-control" name="credits" min="0" max="10"
+                                   value="{{ subject.credits if subject else 0 }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Teacher / Professor</label>
+                            <input type="text" class="form-control" name="teacher"
+                                   value="{{ subject.teacher if subject else '' }}" placeholder="e.g. Dr. Sharma">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Semester</label>
+                            <select class="form-select" name="semester">
+                                <option value="">Select semester</option>
+                                {% for sem in ['Semester I','Semester II','Semester III','Semester IV','Semester V','Semester VI'] %}
+                                <option value="{{ sem }}" {{ 'selected' if subject and subject.semester == sem else '' }}>{{ sem }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Subject Color</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" class="form-control form-control-color" name="color" id="colorPicker"
+                                       value="{{ subject.color if subject else '#4f46e5' }}">
+                                <div class="color-presets">
+                                    {% for c in ['#4f46e5','#0891b2','#059669','#d97706','#dc2626','#7c3aed','#db2777'] %}
+                                    <span class="color-dot" style="background:{{ c }}" onclick="document.getElementById('colorPicker').value='{{ c }}'"></span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>{{ 'Update Subject' if subject else 'Add Subject' }}
+                        </button>
+                        <a href="{{ url_for('subjects.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

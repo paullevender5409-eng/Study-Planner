@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Progress & Analytics – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-bar-chart-line-fill me-2 text-primary"></i>My Progress{% endblock %}
+
+{% block content %}
+<!-- Bento Stat Row -->
+<div class="row g-3 g-md-4 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="bi bi-stopwatch-fill"></i></div>
+            <div class="stat-value">{{ total_hours }}h</div>
+            <div class="stat-label">Total Hours</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="bi bi-calendar2-week-fill"></i></div>
+            <div class="stat-value">{{ week_hours }}h</div>
+            <div class="stat-label">This Week</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-indigo">
+            <div class="stat-icon"><i class="bi bi-calendar2-month-fill"></i></div>
+            <div class="stat-value">{{ month_hours }}h</div>
+            <div class="stat-label">This Month</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="bi bi-fire"></i></div>
+            <div class="stat-value">{{ streak }}</div>
+            <div class="stat-label">Day Streak 🔥</div>
+        </div>
+    </div>
+</div>
+
+<!-- Completion Rate & Weekly Chart -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-4">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-pie-chart text-primary fs-5"></i>
+                    <h5 class="fw-bold">Task Completion</h5>
+                </div>
+            </div>
+            <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                <div class="my-3">
+                    <div class="display-4 fw-bold text-primary">{{ completion_rate }}%</div>
+                    <span class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Completion Rate</span>
+                </div>
+                <div class="p-3 bg-light rounded-3 text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-success fw-medium"><i class="bi bi-check-circle-fill me-1"></i>Completed</span>
+                        <span class="fw-bold">{{ completed_tasks }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-warning fw-medium"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                        <span class="fw-bold">{{ pending_tasks }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-danger fw-medium"><i class="bi bi-exclamation-circle-fill me-1"></i>Overdue</span>
+                        <span class="fw-bold text-danger">{{ overdue_tasks }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-8">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-bar-chart-fill text-primary fs-5"></i>
+                    <h5 class="fw-bold">Weekly Study Hours (Last 7 Days)</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 240px; width: 100%;">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject Hours & Monthly Trend -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-5">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-pie-chart-fill text-purple fs-5"></i>
+                    <h5 class="fw-bold">Subject Distribution</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 210px; width: 100%;">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    {% for s in subject_hours %}
+                    <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: {{ s.color }}; display: inline-block;"></span>
+                            <span class="fw-medium small">{{ s.name }}</span>
+                        </div>
+                        <span class="fw-bold small">{{ s.hours }}h</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-7">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-graph-up text-success fs-5"></i>
+                    <h5 class="fw-bold">Monthly Trend (Last 6 Months)</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 240px; width: 100%;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Task Type Breakdown -->
+<div class="card card-glass">
+    <div class="card-header-custom">
+        <div class="card-title-group">
+            <i class="bi bi-list-check text-primary fs-5"></i>
+            <h5 class="fw-bold">Task Breakdown by Category</h5>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if task_by_type %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-head">
+                    <tr>
+                        <th>Category</th>
+                        <th>Total</th>
+                        <th>Completed</th>
+                        <th>Progress Rate</th>
+                        <th style="width: 35%;">Visual Bar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in task_by_type %}
+                    {% set pct = ((t.done / t.total) * 100)|round(0)|int if t.total > 0 else 0 %}
+                    <tr>
+                        <td><span class="badge badge-soft-primary">{{ t.task_type }}</span></td>
+                        <td>{{ t.total }}</td>
+                        <td>{{ t.done }}</td>
+                        <td><span class="fw-bold">{{ pct }}%</span></td>
+                        <td>
+                            <div class="progress progress-modern" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: {{ pct }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4 mb-0">No categorized tasks available.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Weekly Chart
+const weeklyLabels = {{ weekly_labels | tojson }};
+const weeklyHours = {{ weekly_hours_data | tojson }};
+new Chart(document.getElementById('weeklyChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: weeklyLabels,
+        datasets: [{
+            label: 'Hours',
+            data: weeklyHours,
+            backgroundColor: 'rgba(79, 70, 229, 0.85)',
+            hoverBackgroundColor: '#4f46e5',
+            borderRadius: 8,
+            borderSkipped: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.7)' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Subject Doughnut
+const subjectNames = {{ subject_hours | map(attribute='name') | list | tojson }};
+const subjectHrs = {{ subject_hours | map(attribute='hours') | list | tojson }};
+const subjectColors = {{ subject_hours | map(attribute='color') | list | tojson }};
+new Chart(document.getElementById('subjectChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+        labels: subjectNames,
+        datasets: [{
+            data: subjectHrs,
+            backgroundColor: subjectColors,
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: { legend: { display: false } }
+    }
+});
+
+// Monthly Line Chart
+const monthlyLabels = {{ monthly_data | map(attribute='label') | list | tojson }};
+const monthlyHours = {{ monthly_data | map(attribute='hours') | list | tojson }};
+new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: monthlyLabels,
+        datasets: [{
+            label: 'Hours',
+            data: monthlyHours,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            borderWidth: 3,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 4,
+            fill: true,
+            tension: 0.35
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.7)' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+</script>
+{% endblock %}

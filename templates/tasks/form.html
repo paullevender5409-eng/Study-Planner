@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if task else 'Add' }} Task – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-check2-square me-2"></i>{{ 'Edit' if task else 'Add' }} Task{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-glass">
+            <div class="card-body p-4">
+                <h5 class="mb-4 fw-semibold">{{ 'Edit Task' if task else 'Add New Task' }}</h5>
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Task Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title"
+                                   value="{{ task.title if task else '' }}" placeholder="e.g. Database Mini Project" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Subject</label>
+                            <select class="form-select" name="subject_id">
+                                <option value="">No Subject</option>
+                                {% for sub in subjects %}
+                                <option value="{{ sub.id }}" {{ 'selected' if task and task.subject_id == sub.id else '' }}>{{ sub.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Task Type</label>
+                            <select class="form-select" name="task_type">
+                                {% for t in ['Assignment','Homework','Project','Exam','Presentation','Other'] %}
+                                <option value="{{ t }}" {{ 'selected' if task and task.task_type == t else '' }}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Due Date & Time</label>
+                            <input type="datetime-local" class="form-control" name="due_date"
+                                   value="{{ task.due_date.strftime('%Y-%m-%dT%H:%M') if task and task.due_date else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Priority</label>
+                            <select class="form-select" name="priority">
+                                {% for p in ['Low','Medium','High','Urgent'] %}
+                                <option value="{{ p }}" {{ 'selected' if task and task.priority == p else '' }}>{{ p }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Status</label>
+                            <select class="form-select" name="status">
+                                {% for s in ['Pending','In Progress','Completed','Overdue'] %}
+                                <option value="{{ s }}" {{ 'selected' if task and task.status == s else '' }}>{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea class="form-control" name="description" rows="3"
+                                      placeholder="Task details...">{{ task.description if task else '' }}</textarea>
+                        </div>
+                        <div class="col-12 d-flex gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>{{ 'Update Task' if task else 'Add Task' }}
+                            </button>
+                            <a href="{{ url_for('tasks.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

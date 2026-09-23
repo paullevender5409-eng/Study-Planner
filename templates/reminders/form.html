@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if reminder else 'Add' }} Reminder – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-bell-fill me-2"></i>{{ 'Edit' if reminder else 'Set' }} Reminder{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card card-glass">
+            <div class="card-body p-4">
+                <h5 class="mb-4 fw-semibold">{{ 'Edit Reminder' if reminder else 'Set New Reminder' }}</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Reminder Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="title"
+                               value="{{ reminder.title if reminder else '' }}" placeholder="e.g. Submit Assignment" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Message</label>
+                        <textarea class="form-control" name="message" rows="3"
+                                  placeholder="Reminder details...">{{ reminder.message if reminder else '' }}</textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Remind At <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control" name="remind_at" required
+                                   value="{{ reminder.remind_at.strftime('%Y-%m-%dT%H:%M') if reminder and reminder.remind_at else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Link to Task (Optional)</label>
+                            <select class="form-select" name="related_task_id">
+                                <option value="">None</option>
+                                {% for t in tasks %}
+                                <option value="{{ t.id }}" {{ 'selected' if reminder and reminder.related_task_id == t.id else '' }}>
+                                    {{ t.title[:40] }}{% if t.title|length > 40 %}...{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-bell me-2"></i>{{ 'Update Reminder' if reminder else 'Set Reminder' }}
+                        </button>
+                        <a href="{{ url_for('reminders.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

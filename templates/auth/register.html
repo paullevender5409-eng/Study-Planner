@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Create Account – Smart Study Planner{% endblock %}
+
+{% block auth_content %}
+<div class="auth-page-container">
+    <!-- Left Hero Pane (Desktop) -->
+    <div class="auth-hero-pane d-none d-lg-flex">
+        <div class="auth-hero-content">
+            <div class="auth-hero-brand">
+                <div class="auth-hero-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+                <div>
+                    <h2 class="text-white mb-0 fs-3">StudyPlanner</h2>
+                    <span class="text-white-50 small text-uppercase fw-semibold" style="letter-spacing: 0.08em;">Academic Operating System</span>
+                </div>
+            </div>
+            <h1 class="display-6 fw-bold text-white mb-3">Begin Your Journey to Academic Excellence.</h1>
+            <p class="text-white-50">Join fellow students organizing study schedules, managing complex task boards, and gaining deep visual insights into academic habits.</p>
+
+            <div class="auth-feature-list">
+                <div class="auth-feature-pill">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Personalized timetable & daily session tracker</span>
+                </div>
+                <div class="auth-feature-pill">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Integrated deadline & exam priority queue</span>
+                </div>
+                <div class="auth-feature-pill">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Subject-wise performance metrics</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Form Pane -->
+    <div class="auth-form-pane" style="max-width: 600px;">
+        <div class="auth-form-box" style="max-width: 500px;">
+            <div class="mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center p-2 rounded-3 bg-primary bg-opacity-10 text-primary mb-3 d-lg-none">
+                    <i class="bi bi-book-half fs-4"></i>
+                </div>
+                <h2 class="fw-bold">Create Account</h2>
+                <p class="text-muted">Register to set up your personal academic dashboard.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <label for="name" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="email" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@university.edu" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="password" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Min 6 characters" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="confirm_password" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Confirm <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Repeat password" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="college" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">College</label>
+                        <input type="text" class="form-control" id="college" name="college" placeholder="e.g. Pune University">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="phone" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Phone</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="10-digit number">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="course" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Course</label>
+                        <select class="form-select" id="course" name="course">
+                            <option value="B.Sc. Computer Science" selected>B.Sc. Computer Science</option>
+                            <option value="B.Sc. IT">B.Sc. IT</option>
+                            <option value="BCA">BCA</option>
+                            <option value="B.E. Computer">B.E. Computer</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="year" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Year</label>
+                        <select class="form-select" id="year" name="year">
+                            <option value="FY B.Sc.">FY B.Sc.</option>
+                            <option value="SY B.Sc.">SY B.Sc.</option>
+                            <option value="TY B.Sc." selected>TY B.Sc.</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fs-6" id="registerBtn">
+                            <span>Create Account</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="col-12 text-center">
+                        <p class="text-muted small mb-0">Already registered?
+                            <a href="{{ url_for('auth.login') }}" class="fw-bold">Sign In</a>
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

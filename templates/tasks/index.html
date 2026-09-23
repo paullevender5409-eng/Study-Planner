@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Tasks & Deadlines – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-check2-circle me-2 text-primary"></i>Tasks & Deadlines{% endblock %}
+
+{% block content %}
+<!-- Header Bar with Add Button -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <p class="text-muted mb-0 fw-medium">Manage assignments, deadlines, and project milestones.</p>
+    </div>
+    <a href="{{ url_for('tasks.add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        <span class="d-none d-sm-inline">New Task</span>
+    </a>
+</div>
+
+<!-- Swipeable Filter Chips (Mobile-First) -->
+<div class="swipeable-chips-wrapper">
+    <div class="swipeable-chips">
+        <a href="{{ url_for('tasks.index') }}" class="count-chip {{ 'active' if not status_filter else '' }}">
+            All <span class="chip-num">{{ counts.all }}</span>
+        </a>
+        <a href="{{ url_for('tasks.index', status='Pending') }}" class="count-chip count-yellow {{ 'active' if status_filter == 'Pending' else '' }}">
+            Pending <span class="chip-num">{{ counts.pending }}</span>
+        </a>
+        <a href="{{ url_for('tasks.index', status='In Progress') }}" class="count-chip count-blue {{ 'active' if status_filter == 'In Progress' else '' }}">
+            In Progress <span class="chip-num">{{ counts.in_progress }}</span>
+        </a>
+        <a href="{{ url_for('tasks.index', status='Completed') }}" class="count-chip count-green {{ 'active' if status_filter == 'Completed' else '' }}">
+            Completed <span class="chip-num">{{ counts.completed }}</span>
+        </a>
+        <a href="{{ url_for('tasks.index', status='Overdue') }}" class="count-chip count-red {{ 'active' if status_filter == 'Overdue' else '' }}">
+            Overdue <span class="chip-num">{{ counts.overdue }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card card-glass mb-4">
+    <div class="card-body p-3 p-md-4">
+        <form method="GET" class="row g-2 g-md-3 align-items-end">
+            <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0 ps-0" name="search" value="{{ search }}" placeholder="Filter by title or topic...">
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Subject</label>
+                <select class="form-select" name="subject">
+                    <option value="">All Subjects</option>
+                    {% for sub in subjects %}
+                    <option value="{{ sub.id }}" {{ 'selected' if subject_filter == sub.id|string else '' }}>{{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Priority</label>
+                <select class="form-select" name="priority">
+                    <option value="">All</option>
+                    {% for p in ['Urgent','High','Medium','Low'] %}
+                    <option value="{{ p }}" {{ 'selected' if priority_filter == p else '' }}>{{ p }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-1">
+                <button type="submit" class="btn btn-outline-primary w-100 px-2" title="Apply filter">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="{{ url_for('tasks.index') }}" class="btn btn-outline-secondary w-100">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tasks Container (Dual-View: Desktop Table & Mobile Cards) -->
+{% if tasks %}
+
+<!-- 1. Desktop Table View (>= 768px) -->
+<div class="desktop-table-view">
+    <div class="card card-glass">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="width: 32%;">Task & Details</th>
+                            <th>Subject</th>
+                            <th>Type</th>
+                            <th>Due Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tasks %}
+                        <tr class="{{ 'table-danger-soft' if t.status == 'Overdue' else ('table-success-soft' if t.status == 'Completed' else '') }}">
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if t.status != 'Completed' %}
+                                    <form method="POST" action="{{ url_for('tasks.complete', task_id=t.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-icon text-muted" title="Mark completed">
+                                            <i class="bi bi-circle fs-5"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-success"><i class="bi bi-check-circle-fill fs-5"></i></span>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold {{ 'text-decoration-line-through text-muted' if t.status == 'Completed' else '' }}">{{ t.title }}</div>
+                                        {% if t.description %}
+                                        <small class="text-muted d-block text-truncate" style="max-width: 320px;">{{ t.description }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if t.subject_name %}
+                                <span class="badge badge-soft-secondary">{{ t.subject_name }}</span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td><span class="badge badge-soft-secondary">{{ t.task_type }}</span></td>
+                            <td>
+                                {% if t.due_date %}
+                                <span class="{{ 'text-danger fw-bold' if t.status == 'Overdue' else '' }}">
+                                    {{ t.due_date.strftime('%b %d, %Y') }}<br>
+                                    <small class="text-muted">{{ t.due_date.strftime('%I:%M %p') }}</small>
+                                </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>
+                                <span class="priority-chip priority-{{ t.priority.lower() }}">
+                                    {{ t.priority }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if t.status == 'Completed' %}
+                                <span class="badge badge-soft-success">Completed</span>
+                                {% elif t.status == 'Overdue' %}
+                                <span class="badge badge-soft-danger">Overdue</span>
+                                {% elif t.status == 'In Progress' %}
+                                <span class="badge badge-soft-primary">In Progress</span>
+                                {% else %}
+                                <span class="badge badge-soft-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{{ url_for('tasks.edit', task_id=t.id) }}" class="btn btn-icon" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('tasks.delete', task_id=t.id) }}" class="d-inline"
+                                          onsubmit="return confirm('Delete task {{ t.title }}?')">
+                                        <button type="submit" class="btn btn-icon text-danger" title="Delete">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Mobile Touch Cards View (< 768px) -->
+<div class="mobile-cards-view">
+    {% for t in tasks %}
+    <div class="mobile-item-card">
+        <div class="mobile-card-header">
+            <div class="mobile-card-title-group">
+                {% if t.status != 'Completed' %}
+                <form method="POST" action="{{ url_for('tasks.complete', task_id=t.id) }}" class="d-inline">
+                    <button type="submit" class="mobile-check-btn" aria-label="Mark done">
+                        <i class="bi bi-circle"></i>
+                    </button>
+                </form>
+                {% else %}
+                <span class="mobile-check-btn checked">
+                    <i class="bi bi-check-circle-fill"></i>
+                </span>
+                {% endif %}
+                <div>
+                    <div class="mobile-item-title {{ 'completed' if t.status == 'Completed' else '' }}">{{ t.title }}</div>
+                    {% if t.description %}
+                    <div class="mobile-item-desc">{{ t.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-card-badges">
+            {% if t.subject_name %}
+            <span class="badge badge-soft-secondary">{{ t.subject_name }}</span>
+            {% endif %}
+            <span class="badge badge-soft-secondary">{{ t.task_type }}</span>
+            <span class="priority-chip priority-{{ t.priority.lower() }}">{{ t.priority }}</span>
+
+            {% if t.status == 'Completed' %}
+            <span class="badge badge-soft-success ms-auto">Done</span>
+            {% elif t.status == 'Overdue' %}
+            <span class="badge badge-soft-danger ms-auto">Overdue</span>
+            {% elif t.status == 'In Progress' %}
+            <span class="badge badge-soft-primary ms-auto">In Progress</span>
+            {% else %}
+            <span class="badge badge-soft-warning ms-auto">Pending</span>
+            {% endif %}
+        </div>
+
+        <div class="mobile-card-footer">
+            <div>
+                {% if t.due_date %}
+                <i class="bi bi-calendar3 me-1"></i>
+                <span class="{{ 'text-danger fw-bold' if t.status == 'Overdue' else '' }}">
+                    Due {{ t.due_date.strftime('%b %d, %I:%M %p') }}
+                </span>
+                {% else %}
+                <span>No due date</span>
+                {% endif %}
+            </div>
+            <div class="mobile-action-btns">
+                <a href="{{ url_for('tasks.edit', task_id=t.id) }}" class="btn btn-sm btn-icon" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <form method="POST" action="{{ url_for('tasks.delete', task_id=t.id) }}" class="d-inline"
+                      onsubmit="return confirm('Delete task {{ t.title }}?')">
+                    <button type="submit" class="btn btn-sm btn-icon text-danger" title="Delete">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="card card-glass">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-check2-all fs-1 text-primary opacity-50 d-block mb-3"></i>
+        <h5 class="fw-bold">No tasks found</h5>
+        <p class="text-muted mb-3">Keep organized by adding your coursework and assignments.</p>
+        <a href="{{ url_for('tasks.add') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Create First Task
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

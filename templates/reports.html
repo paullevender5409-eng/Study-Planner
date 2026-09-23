@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block title %}Visual Reports – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-pie-chart-fill me-2 text-primary"></i>Visual Reports{% endblock %}
+
+{% block content %}
+<!-- Bento Summary Cards -->
+<div class="row g-3 g-md-4 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="bi bi-clock-fill"></i></div>
+            <div class="stat-value">{{ total_hours }}h</div>
+            <div class="stat-label">Total Study Hours</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="stat-value">{{ completed_tasks }}</div>
+            <div class="stat-label">Tasks Completed</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="stat-value">{{ avg_daily }}h</div>
+            <div class="stat-label">Avg Daily Hours</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-indigo">
+            <div class="stat-icon"><i class="bi bi-list-task"></i></div>
+            <div class="stat-value">{{ total_tasks }}</div>
+            <div class="stat-label">Total Tasks</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="row g-4 mb-4">
+    <!-- Weekly Hours Bar -->
+    <div class="col-12 col-lg-8">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-bar-chart-fill text-primary fs-5"></i>
+                    <h5 class="fw-bold">Weekly Study Hours</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 230px; width: 100%;">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Status Doughnut -->
+    <div class="col-12 col-lg-4">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-pie-chart-fill text-warning fs-5"></i>
+                    <h5 class="fw-bold">Task Status Distribution</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4 d-flex flex-column align-items-center">
+                <div style="position: relative; height: 180px; width: 100%;">
+                    <canvas id="taskStatusChart"></canvas>
+                </div>
+                <div class="mt-3 w-100">
+                    {% for ts in task_status %}
+                    <div class="d-flex justify-content-between small py-1 border-bottom">
+                        <span class="fw-medium">{{ ts.status }}</span>
+                        <span class="fw-bold">{{ ts.cnt }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Subject Hours Doughnut -->
+    <div class="col-12 col-lg-5">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-pie-chart text-purple fs-5"></i>
+                    <h5 class="fw-bold">Subject-wise Study Hours</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 210px; width: 100%;">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    {% for s in subject_hours %}
+                    <div class="d-flex justify-content-between align-items-center small py-1 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ s.color }}; display: inline-block;"></span>
+                            <span class="fw-medium">{{ s.name }}</span>
+                        </div>
+                        <span class="fw-bold">{{ s.hours }}h ({{ s.session_count }} sess)</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Activity Line Chart -->
+    <div class="col-12 col-lg-7">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-graph-up text-success fs-5"></i>
+                    <h5 class="fw-bold">Monthly Trend (Hours vs Sessions)</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 260px; width: 100%;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Study Type & Subject Table -->
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-bar-chart-steps text-info fs-5"></i>
+                    <h5 class="fw-bold">Study Method Distribution</h5>
+                </div>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="card card-glass h-100">
+            <div class="card-header-custom">
+                <div class="card-title-group">
+                    <i class="bi bi-journal-bookmark-fill text-primary fs-5"></i>
+                    <h5 class="fw-bold">Subject Activity Summary</h5>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-head">
+                            <tr>
+                                <th>Subject</th>
+                                <th>Hours</th>
+                                <th>Sessions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in subject_hours %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="width: 10px; height: 10px; border-radius: 50%; background: {{ s.color }};"></span>
+                                        <span class="fw-bold">{{ s.name }}</span>
+                                    </div>
+                                </td>
+                                <td><span class="fw-semibold">{{ s.hours }}h</span></td>
+                                <td>{{ s.session_count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">No subject activity recorded</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Weekly Chart
+const wLabels = {{ weekly_labels | tojson }};
+const wData = {{ weekly_hours_data | tojson }};
+new Chart(document.getElementById('weeklyChart'), {
+    type: 'bar',
+    data: {
+        labels: wLabels,
+        datasets: [{
+            label: 'Hours',
+            data: wData,
+            backgroundColor: 'rgba(79, 70, 229, 0.85)',
+            hoverBackgroundColor: '#4f46e5',
+            borderRadius: 8,
+            borderSkipped: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.7)' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Task Status Doughnut
+const tsLabels = {{ task_status | map(attribute='status') | list | tojson }};
+const tsData = {{ task_status | map(attribute='cnt') | list | tojson }};
+const tsColors = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'];
+new Chart(document.getElementById('taskStatusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: tsLabels,
+        datasets: [{
+            data: tsData,
+            backgroundColor: tsColors,
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: { legend: { position: 'bottom' } }
+    }
+});
+
+// Subject Doughnut
+const sNames = {{ subject_hours | map(attribute='name') | list | tojson }};
+const sHours = {{ subject_hours | map(attribute='hours') | list | tojson }};
+const sColors = {{ subject_hours | map(attribute='color') | list | tojson }};
+new Chart(document.getElementById('subjectChart'), {
+    type: 'doughnut',
+    data: {
+        labels: sNames,
+        datasets: [{
+            data: sHours,
+            backgroundColor: sColors,
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: { legend: { display: false } }
+    }
+});
+
+// Monthly Line Chart
+const mLabels = {{ monthly_labels | tojson }};
+const mHours = {{ monthly_hours | tojson }};
+const mSessions = {{ monthly_sessions | tojson }};
+new Chart(document.getElementById('monthlyChart'), {
+    type: 'line',
+    data: {
+        labels: mLabels,
+        datasets: [
+            {
+                label: 'Hours',
+                data: mHours,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2.5,
+                pointRadius: 4,
+                yAxisID: 'y'
+            },
+            {
+                label: 'Sessions',
+                data: mSessions,
+                borderColor: '#6366f1',
+                backgroundColor: 'transparent',
+                tension: 0.35,
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 3,
+                yAxisID: 'y1'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+            y: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                grid: { color: 'rgba(226, 232, 240, 0.7)' },
+                title: { display: true, text: 'Hours' }
+            },
+            y1: {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                title: { display: true, text: 'Sessions' },
+                grid: { drawOnChartArea: false }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Study Type Horizontal Bar
+const typeLabels = {{ type_distribution | map(attribute='study_type') | list | tojson }};
+const typeCounts = {{ type_distribution | map(attribute='cnt') | list | tojson }};
+new Chart(document.getElementById('typeChart'), {
+    type: 'bar',
+    data: {
+        labels: typeLabels,
+        datasets: [{
+            label: 'Sessions',
+            data: typeCounts,
+            backgroundColor: ['#4f46e5', '#0891b2', '#10b981', '#f59e0b', '#f43f5e'],
+            borderRadius: 6
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.7)' } },
+            y: { grid: { display: false } }
+        }
+    }
+});
+</script>
+{% endblock %}

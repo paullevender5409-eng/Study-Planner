@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Study Schedule – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-calendar3 me-2 text-primary"></i>Study Schedule{% endblock %}
+
+{% block content %}
+<!-- Header Bar -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <p class="text-muted mb-0 fw-medium">{{ sessions|length }} planned session(s)</p>
+    </div>
+    <a href="{{ url_for('schedule.add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        <span>New Session</span>
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card card-glass mb-4">
+    <div class="card-body p-3 p-md-4">
+        <form method="GET" class="row g-2 g-md-3 align-items-end">
+            <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Filter by Date</label>
+                <input type="date" class="form-control" name="date" value="{{ filter_date }}">
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Filter by Subject</label>
+                <select class="form-select" name="subject">
+                    <option value="">All Subjects</option>
+                    {% for sub in subjects %}
+                    <option value="{{ sub.id }}" {{ 'selected' if filter_subject == sub.id|string else '' }}>{{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-funnel me-1"></i>Filter</button>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="{{ url_for('schedule.index') }}" class="btn btn-outline-secondary w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if sessions %}
+
+<!-- 1. Desktop Table View (>= 768px) -->
+<div class="desktop-table-view">
+    <div class="card card-glass">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="width: 28%;">Topic & Notes</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Time Window</th>
+                            <th>Type</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sessions %}
+                        <tr class="{{ 'table-success-soft' if s.is_completed else '' }}">
+                            <td>
+                                <div class="fw-bold">{{ s.topic or 'Study Session' }}</div>
+                                {% if s.notes %}
+                                <small class="text-muted d-block text-truncate" style="max-width: 280px;">{{ s.notes }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if s.subject_name %}
+                                <span class="subject-badge" style="background: {{ s.color or '#4f46e5' }}18; color: {{ s.color or '#4f46e5' }}">
+                                    {{ s.subject_name }}
+                                </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>{{ s.session_date.strftime('%b %d, %Y') if s.session_date else '—' }}</td>
+                            <td>
+                                <div class="schedule-time-chip d-inline-block">
+                                    {{ s.start_time.strftime('%I:%M %p') if s.start_time else '' }} – {{ s.end_time.strftime('%I:%M %p') if s.end_time else '' }}
+                                </div>
+                            </td>
+                            <td><span class="badge badge-soft-primary">{{ s.study_type }}</span></td>
+                            <td>
+                                <span class="priority-chip priority-{{ s.priority.lower() }}">{{ s.priority }}</span>
+                            </td>
+                            <td>
+                                {% if s.is_completed %}
+                                <span class="badge badge-soft-success"><i class="bi bi-check2"></i> Done</span>
+                                {% else %}
+                                <span class="badge badge-soft-warning">Scheduled</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    {% if not s.is_completed %}
+                                    <form method="POST" action="{{ url_for('schedule.complete', session_id=s.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-icon text-success" title="Mark Done">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <a href="{{ url_for('schedule.edit', session_id=s.id) }}" class="btn btn-icon" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('schedule.delete', session_id=s.id) }}" class="d-inline"
+                                          onsubmit="return confirm('Delete this study session?')">
+                                        <button type="submit" class="btn btn-icon text-danger" title="Delete">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Mobile Touch Cards View (< 768px) -->
+<div class="mobile-cards-view">
+    {% for s in sessions %}
+    <div class="mobile-item-card">
+        <div class="mobile-card-header">
+            <div class="mobile-card-title-group">
+                {% if not s.is_completed %}
+                <form method="POST" action="{{ url_for('schedule.complete', session_id=s.id) }}" class="d-inline">
+                    <button type="submit" class="mobile-check-btn" aria-label="Mark completed">
+                        <i class="bi bi-circle"></i>
+                    </button>
+                </form>
+                {% else %}
+                <span class="mobile-check-btn checked">
+                    <i class="bi bi-check-circle-fill"></i>
+                </span>
+                {% endif %}
+                <div>
+                    <div class="mobile-item-title {{ 'completed' if s.is_completed else '' }}">{{ s.topic or 'Study Session' }}</div>
+                    {% if s.notes %}
+                    <div class="mobile-item-desc">{{ s.notes }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-card-badges">
+            {% if s.subject_name %}
+            <span class="subject-badge" style="background: {{ s.color or '#4f46e5' }}18; color: {{ s.color or '#4f46e5' }}">
+                {{ s.subject_name }}
+            </span>
+            {% endif %}
+            <span class="badge badge-soft-primary">{{ s.study_type }}</span>
+            <span class="priority-chip priority-{{ s.priority.lower() }}">{{ s.priority }}</span>
+
+            {% if s.is_completed %}
+            <span class="badge badge-soft-success ms-auto">Done</span>
+            {% else %}
+            <span class="badge badge-soft-warning ms-auto">Scheduled</span>
+            {% endif %}
+        </div>
+
+        <div class="mobile-card-footer">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-clock text-muted"></i>
+                <span>{{ s.session_date.strftime('%b %d') if s.session_date else '' }} • {{ s.start_time.strftime('%I:%M %p') if s.start_time else '' }}</span>
+            </div>
+            <div class="mobile-action-btns">
+                <a href="{{ url_for('schedule.edit', session_id=s.id) }}" class="btn btn-sm btn-icon" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <form method="POST" action="{{ url_for('schedule.delete', session_id=s.id) }}" class="d-inline"
+                      onsubmit="return confirm('Delete this study session?')">
+                    <button type="submit" class="btn btn-sm btn-icon text-danger" title="Delete">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="card card-glass">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-calendar-x fs-1 text-primary opacity-50 d-block mb-3"></i>
+        <h5 class="fw-bold">No study sessions found</h5>
+        <p class="text-muted mb-3">Schedule your study slots to stay on track for exams and assignments.</p>
+        <a href="{{ url_for('schedule.add') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Schedule First Session
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

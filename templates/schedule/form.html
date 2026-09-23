@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if session else 'Add' }} Study Session – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-calendar3 me-2"></i>{{ 'Edit' if session else 'Add' }} Study Session{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-glass">
+            <div class="card-body p-4">
+                <h5 class="mb-4 fw-semibold">{{ 'Edit Study Session' if session else 'Schedule New Study Session' }}</h5>
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Subject</label>
+                            <select class="form-select" name="subject_id">
+                                <option value="">General / No Subject</option>
+                                {% for sub in subjects %}
+                                <option value="{{ sub.id }}" {{ 'selected' if session and session.subject_id == sub.id else '' }}>{{ sub.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Topic</label>
+                            <input type="text" class="form-control" name="topic"
+                                   value="{{ session.topic if session else '' }}" placeholder="e.g. Dynamic Programming">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="session_date" required
+                                   value="{{ session.session_date.strftime('%Y-%m-%d') if session and session.session_date else today }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" name="start_time" required
+                                   value="{{ session.start_time.strftime('%H:%M') if session and session.start_time else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" name="end_time" required
+                                   value="{{ session.end_time.strftime('%H:%M') if session and session.end_time else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Study Type</label>
+                            <select class="form-select" name="study_type">
+                                {% for t in ['Reading','Revision','Practice','Exam Prep','Project'] %}
+                                <option value="{{ t }}" {{ 'selected' if session and session.study_type == t else '' }}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Priority</label>
+                            <select class="form-select" name="priority">
+                                {% for p in ['Low','Medium','High'] %}
+                                <option value="{{ p }}" {{ 'selected' if session and session.priority == p else '' }}>{{ p }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if session %}
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_completed" id="is_completed"
+                                       {{ 'checked' if session.is_completed else '' }}>
+                                <label class="form-check-label fw-semibold" for="is_completed">Mark as Completed</label>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Notes</label>
+                            <textarea class="form-control" name="notes" rows="3" placeholder="Any notes for this session...">{{ session.notes if session else '' }}</textarea>
+                        </div>
+                        <div class="col-12 d-flex gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>{{ 'Update Session' if session else 'Add Session' }}
+                            </button>
+                            <a href="{{ url_for('schedule.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

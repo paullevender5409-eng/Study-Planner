@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Reminders – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-bell-fill me-2 text-primary"></i>Reminders{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <p class="text-muted mb-0 fw-medium"><strong>{{ reminders|length }}</strong> active reminder(s)</p>
+    </div>
+    <a href="{{ url_for('reminders.add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        <span>Set Reminder</span>
+    </a>
+</div>
+
+{% if reminders %}
+<div class="row g-3 g-md-4">
+    {% for r in reminders %}
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="card card-glass h-100">
+            <div class="card-body p-3 p-md-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="stat-icon m-0 {{ 'bg-secondary bg-opacity-10 text-muted' if r.is_seen else 'bg-warning bg-opacity-10 text-warning' }}" style="width: 38px; height: 38px;">
+                        <i class="bi bi-bell{{ '-slash' if r.is_seen else '-fill' }}"></i>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-icon" data-bs-toggle="dropdown" aria-label="Reminder actions">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li><a class="dropdown-item" href="{{ url_for('reminders.edit', reminder_id=r.id) }}"><i class="bi bi-pencil me-2 text-muted"></i>Edit</a></li>
+                            {% if not r.is_seen %}
+                            <li>
+                                <form method="POST" action="{{ url_for('reminders.mark_seen', reminder_id=r.id) }}">
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-eye me-2 text-muted"></i>Mark as Seen</button>
+                                </form>
+                            </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ url_for('reminders.delete', reminder_id=r.id) }}"
+                                      onsubmit="return confirm('Delete this reminder?')">
+                                    <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash3 me-2"></i>Delete</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-2 {{ 'text-muted text-decoration-line-through' if r.is_seen else '' }}">{{ r.title }}</h5>
+
+                {% if r.message %}
+                <p class="text-muted small mb-3 flex-grow-1">{{ r.message }}</p>
+                {% else %}
+                <div class="flex-grow-1"></div>
+                {% endif %}
+
+                {% if r.task_title %}
+                <div class="p-2 rounded-2 bg-light mb-3 small d-flex align-items-center gap-2">
+                    <i class="bi bi-link-45deg text-primary fs-6"></i>
+                    <span class="text-truncate fw-medium">{{ r.task_title }}</span>
+                </div>
+                {% endif %}
+
+                <div class="d-flex align-items-center justify-content-between pt-2 border-top text-muted small">
+                    <div class="d-flex align-items-center gap-1">
+                        <i class="bi bi-clock"></i>
+                        <span>{{ r.remind_at.strftime('%b %d, %I:%M %p') }}</span>
+                    </div>
+                    {% if r.remind_at < now and not r.is_seen %}
+                    <span class="badge badge-soft-danger">Overdue</span>
+                    {% elif r.is_seen %}
+                    <span class="badge badge-soft-secondary">Seen</span>
+                    {% else %}
+                    <span class="badge badge-soft-success">Upcoming</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card card-glass">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-bell-slash fs-1 text-primary opacity-50 d-block mb-3"></i>
+        <h5 class="fw-bold">No reminders set</h5>
+        <p class="text-muted mb-3">Keep ahead of deadlines by scheduling custom alerts.</p>
+        <a href="{{ url_for('reminders.add') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Set First Reminder
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

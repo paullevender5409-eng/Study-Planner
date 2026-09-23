@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Subjects – Smart Study Planner{% endblock %}
+{% block page_title %}<i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>Subjects Directory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <p class="text-muted mb-0 fw-medium"><strong>{{ subjects|length }}</strong> enrolled academic course(s)</p>
+    </div>
+    <a href="{{ url_for('subjects.add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        <span>Add Subject</span>
+    </a>
+</div>
+
+{% if subjects %}
+<div class="row g-3 g-md-4">
+    {% for sub in subjects %}
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="card subject-card h-100">
+            <div style="height: 4px; background: {{ sub.color or '#4f46e5' }};"></div>
+            <div class="subject-card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="subject-icon-wrap" style="background: {{ sub.color or '#4f46e5' }}18; color: {{ sub.color or '#4f46e5' }}">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-icon" data-bs-toggle="dropdown" aria-label="Subject actions">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('subjects.edit', subject_id=sub.id) }}">
+                                    <i class="bi bi-pencil me-2 text-muted"></i>Edit
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ url_for('subjects.delete', subject_id=sub.id) }}"
+                                      onsubmit="return confirm('Delete subject {{ sub.name }}?')">
+                                    <button class="dropdown-item text-danger">
+                                        <i class="bi bi-trash3 me-2"></i>Delete
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h5 class="subject-title">{{ sub.name }}</h5>
+                <div class="d-flex flex-wrap gap-1 mb-2">
+                    {% if sub.code %}
+                    <span class="badge badge-soft-primary">{{ sub.code }}</span>
+                    {% endif %}
+                    {% if sub.semester %}
+                    <span class="badge badge-soft-secondary">{{ sub.semester }}</span>
+                    {% endif %}
+                    {% if sub.credits %}
+                    <span class="badge badge-soft-warning">{{ sub.credits }} Credits</span>
+                    {% endif %}
+                </div>
+
+                {% if sub.teacher %}
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-person me-1"></i>{{ sub.teacher }}
+                </p>
+                {% endif %}
+
+                <div class="subject-stats-bar">
+                    <div class="subject-stat-col">
+                        <span class="subject-stat-val">{{ sub.study_hours or 0 }}h</span>
+                        <span class="subject-stat-lbl">Studied</span>
+                    </div>
+                    <div class="subject-stat-col">
+                        <span class="subject-stat-val">{{ sub.session_count }}</span>
+                        <span class="subject-stat-lbl">Sessions</span>
+                    </div>
+                    <div class="subject-stat-col">
+                        <span class="subject-stat-val">{{ sub.task_count }}</span>
+                        <span class="subject-stat-lbl">Tasks</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card card-glass">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-journal-x fs-1 text-primary opacity-50 d-block mb-3"></i>
+        <h5 class="fw-bold">No subjects added yet</h5>
+        <p class="text-muted mb-3">Create your subjects to begin scheduling study sessions and assignments.</p>
+        <a href="{{ url_for('subjects.add') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Add First Subject
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Sign In – Smart Study Planner{% endblock %}
+
+{% block auth_content %}
+<div class="auth-page-container">
+    <!-- Left Hero Pane (Desktop) -->
+    <div class="auth-hero-pane d-none d-lg-flex">
+        <div class="auth-hero-content">
+            <div class="auth-hero-brand">
+                <div class="auth-hero-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+                <div>
+                    <h2 class="text-white mb-0 fs-3">StudyPlanner</h2>
+                    <span class="text-white-50 small text-uppercase fw-semibold" style="letter-spacing: 0.08em;">Academic Operating System</span>
+                </div>
+            </div>
+            <h1 class="display-6 fw-bold text-white mb-3">Plan Smart.<br>Study Better.<br>Achieve More.</h1>
+            <p class="text-white-50">The comprehensive study planner designed for TY B.Sc. Computer Science students to conquer coursework, schedules, and final year projects.</p>
+
+            <div class="auth-feature-list">
+                <div class="auth-feature-pill">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Track daily study hours & maintain learning streaks</span>
+                </div>
+                <div class="auth-feature-pill">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Organize deadlines with overdue auto-detection</span>
+                </div>
+                <div class="auth-feature-pill">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Visual analytics with Chart.js academic reports</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Form Pane -->
+    <div class="auth-form-pane">
+        <div class="auth-form-box">
+            <div class="mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center p-2 rounded-3 bg-primary bg-opacity-10 text-primary mb-3 d-lg-none">
+                    <i class="bi bi-book-half fs-4"></i>
+                </div>
+                <h2 class="fw-bold">Welcome Back</h2>
+                <p class="text-muted">Sign in to continue your academic journey.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+                <div class="mb-3">
+                    <label for="email" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control border-start-0 ps-0" id="email" name="email"
+                               placeholder="name@university.edu" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.04em;">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control border-start-0 border-end-0 ps-0" id="password" name="password"
+                               placeholder="••••••••" required autocomplete="current-password">
+                        <button type="button" class="btn btn-outline-secondary border-start-0 bg-white text-muted" onclick="togglePw('password')" aria-label="Toggle password view">
+                            <i class="bi bi-eye" id="pw-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3 fs-6" id="loginBtn">
+                    <span>Sign In</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <p class="text-center text-muted small mb-0">
+                    Don't have an account?
+                    <a href="{{ url_for('auth.register') }}" class="fw-bold">Create Account</a>
+                </p>
+            </form>
+
+            <!-- Quick Demo Credentials Box -->
+            <div class="auth-demo-badge">
+                <div class="d-flex align-items-center gap-2 mb-2 text-primary fw-bold">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Quick Demo Credentials</span>
+                </div>
+                <div class="small text-muted mb-2">
+                    <div><b>Email:</b> pranali@example.com</div>
+                    <div><b>Password:</b> Demo@123</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="fillDemo()">
+                    Auto-Fill Demo Credentials
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePw(id) {
+    const f = document.getElementById(id);
+    const icon = document.getElementById('pw-icon');
+    if (f.type === 'password') {
+        f.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        f.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+function fillDemo() {
+    document.getElementById('email').value = 'pranali@example.com';
+    document.getElementById('password').value = 'Demo@123';
+}
+</script>
+{% endblock %}
