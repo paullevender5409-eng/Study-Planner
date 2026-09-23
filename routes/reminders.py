@@ -37,6 +37,10 @@ def add():
             flash('Title and reminder time are required.', 'danger')
             return render_template('reminders/form.html', reminder=None, tasks=tasks)
 
+        remind_at = remind_at.replace('T', ' ')
+        if len(remind_at) == 16:
+            remind_at += ':00'
+
         query_db(
             'INSERT INTO reminders (user_id, title, message, remind_at, related_task_id) VALUES (%s,%s,%s,%s,%s)',
             (user_id, title, message, remind_at, related_task_id),
@@ -65,6 +69,11 @@ def edit(reminder_id):
         remind_at = request.form.get('remind_at', '')
         related_task_id = request.form.get('related_task_id') or None
 
+        if remind_at:
+            remind_at = remind_at.replace('T', ' ')
+            if len(remind_at) == 16:
+                remind_at += ':00'
+
         query_db(
             'UPDATE reminders SET title=%s, message=%s, remind_at=%s, related_task_id=%s WHERE id=%s AND user_id=%s',
             (title, message, remind_at, related_task_id, reminder_id, user_id),
@@ -86,6 +95,7 @@ def delete(reminder_id):
 
 
 @reminders_bp.route('/mark-seen/<int:reminder_id>', methods=['POST'])
+@reminders_bp.route('/seen/<int:reminder_id>', methods=['POST'])
 @login_required
 def mark_seen(reminder_id):
     user_id = session['user_id']

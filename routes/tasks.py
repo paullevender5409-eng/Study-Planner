@@ -82,6 +82,8 @@ def add():
         description = request.form.get('description', '').strip()
         task_type   = request.form.get('task_type', 'Assignment')
         due_date    = request.form.get('due_date', '').replace('T', ' ') or None
+        if due_date and len(due_date) == 16:
+            due_date += ':00'
         priority    = request.form.get('priority', 'Medium')
         status      = request.form.get('status', 'Pending')
 
@@ -119,6 +121,8 @@ def edit(task_id):
         description = request.form.get('description', '').strip()
         task_type   = request.form.get('task_type', 'Assignment')
         due_date    = request.form.get('due_date', '').replace('T', ' ') or None
+        if due_date and len(due_date) == 16:
+            due_date += ':00'
         priority    = request.form.get('priority', 'Medium')
         status      = request.form.get('status', 'Pending')
 

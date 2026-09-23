@@ -30,7 +30,7 @@ def _row_factory(cursor, row):
             # Explicit DATETIME fields first (before suffix checks)
             if name in DATETIME_FIELDS or name.endswith('_at'):
                 for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S',
-                            '%Y-%m-%d %H:%M', '%Y-%m-%d'):
+                            '%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M', '%Y-%m-%d'):
                     try:
                         val = datetime.strptime(val, fmt)
                         break
@@ -43,7 +43,8 @@ def _row_factory(cursor, row):
                     val = datetime.strptime(val, '%Y-%m-%d').date()
                 except ValueError:
                     # Might contain a full datetime; try that too
-                    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S'):
+                    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S',
+                                '%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M'):
                         try:
                             val = datetime.strptime(val, fmt)
                             break

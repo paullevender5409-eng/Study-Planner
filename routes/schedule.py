@@ -53,11 +53,11 @@ def add():
 
         if not all([session_date, start_time, end_time]):
             flash('Date, start time, and end time are required.', 'danger')
-            return render_template('schedule/form.html', session=None, subjects=subjects,
+            return render_template('schedule/form.html', study_session=None, subjects=subjects,
                                    today=date.today().strftime('%Y-%m-%d'))
         if start_time >= end_time:
             flash('End time must be after start time.', 'danger')
-            return render_template('schedule/form.html', session=None, subjects=subjects,
+            return render_template('schedule/form.html', study_session=None, subjects=subjects,
                                    today=date.today().strftime('%Y-%m-%d'))
 
         # Normalise times to HH:MM:SS
@@ -74,7 +74,7 @@ def add():
         flash('Study session added!', 'success')
         return redirect(url_for('schedule.index'))
 
-    return render_template('schedule/form.html', session=None, subjects=subjects,
+    return render_template('schedule/form.html', study_session=None, subjects=subjects,
                            today=date.today().strftime('%Y-%m-%d'))
 
 
@@ -114,7 +114,7 @@ def edit(session_id):
         flash('Session updated!', 'success')
         return redirect(url_for('schedule.index'))
 
-    return render_template('schedule/form.html', session=sess, subjects=subjects,
+    return render_template('schedule/form.html', study_session=sess, subjects=subjects,
                            today=date.today().strftime('%Y-%m-%d'))
 
 
